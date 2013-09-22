@@ -33,8 +33,12 @@
         <hr>
 
         <section id="main_content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Get Started Quickly</h3>
+<p>Aviator is designed to be a thin wrapper for the OpenStack API so that you only need to consult
+the OpenStack API documents instead of jumping between that and the Aviator API docs when you code.</p>
+
+<br/>
+
+<h3>Get Started Quickly</h3>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 require 'aviator'
@@ -86,10 +90,10 @@ development:
 <p>The <code>auth_credentials</code> in the config file are optional or can be overridden during authentication:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session.authenticate do |credentials|
-  credentials[:username]   = myusername
-  credentials[:password]   = mypassword
-  credentials[:tenantName] = tenantName
+session.authenticate do |params|
+  params[:username]   = myusername
+  params[:password]   = mypassword
+  params[:tenantName] = tenantName
 end
 </pre>
 
@@ -111,7 +115,7 @@ Available services for openstack:
   image
   metering
   volume
-  
+
 $ aviator describe openstack compute
 Available requests for openstack compute_service:
   v2 admin confirm_server_resize
@@ -123,7 +127,7 @@ Available requests for openstack compute_service:
   v2 public create_image
   v2 public create_server
   ...
-  
+
 $ aviator describe openstack compute v2 public create_server
 Request: create_server
 
@@ -160,7 +164,7 @@ Links:
 
 <h3>...Or Read the Code Directly</h3>
 
-<p>We designed a DSL for the request files so that they are easy to read, easy to add to, and pretty much be self documenting (in fact, the same code is used by the <code>describe</code> CLI tool!). For instance, here is the actual code for the <code>create_server</code> request:</p>
+<p>We designed a DSL for the request definition files so that they are easy to read, easy to add to, and pretty much be self documenting (in fact, the same code is used by the <code>describe</code> CLI tool). For instance, here is the actual code for the <code>create_server</code> request:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
     module Aviator
@@ -226,7 +230,7 @@ Links:
 
 <p>Browse the rest of the request files <a href="https://github.com/aviator/aviator/tree/master/lib/aviator/openstack">here</a>.</p>
 
-<h3>Session Management Tools</h3>
+<h3>Session Management API</h3>
 
 <p>Serialize the session information for caching. The output is in plaintext JSON which
  contains sensitive information. You are responsible for securing that.</p>
@@ -316,23 +320,27 @@ response = keystone.request(:list_tenants, endpoint_type: 'admin')
 
 <p>In the configuration file, the validator can be any request name as long as:</p>
 
+<p>
     <ul>
         <li>It is defined in Aviator</li>
         <li>Does not require any parameters</li>
         <li>It returns an HTTP status 200 or 203 to indicate auth info validity.</li>
         <li>It returns any other HTTP status to indicate that the auth info is invalid.</li>
     </ul>
+</p>
 
 <br/>
 
 <h3>Useful Links</h3>
 
+<p>
 <ul>
     <li><a href="https://github.com/aviator/aviator">The code at Github</a></li>
     <li><a href="https://github.com/aviator/aviator/issues?state=open">Bug tracker</a></li>
     <li><a href="https://github.com/aviator/aviator/wiki">Wiki</a></li>
     <li><a href="https://github.com/aviator/www">The code for this website</a></li>
 </ul>
+</p>
 
 <br/>
 
