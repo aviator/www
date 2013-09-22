@@ -19,4 +19,4 @@ tmp/*.*
 .DS_Store
 test/environment.yml
 vcr.log
-
+_site
