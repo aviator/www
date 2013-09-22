@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript" src="javascripts/shCore.js"></script>
+    <script type="text/javascript" src="javascripts/shBrushRuby.js"></script>
+    <script type="text/javascript" src="javascripts/shBrushYaml.js"></script>
+    <script type="text/javascript" src="javascripts/shBrushPlain.js"></script>
+
+    <link href="stylesheets/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/shThemeMidnight.css" rel="stylesheet" type="text/css" />
+    <title>Aviator Gem</title>
+  </head>
+
+  <body>
+      <a href="https://github.com/aviator/aviator"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <img src="images/logo-large-alpha.png"/>
+          <h2>A lightweight Ruby library for working with the OpenStack API</h2>
+        </header>
+        <hr>
+
+        <section id="main_content">
+          <h3>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Get Started Quickly</h3>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+require 'aviator'
+
+session = Aviator::Session.new(
+            config_file: 'path/to/aviator.yml',
+            environment: :production,
+            log_file:    'path/to/aviator.log'
+          )
+
+session.authenticate
+
+keystone = session.identity_service
+response = keystone.request(:list_tenants)
+puts response.body
+</pre>
+
+<br/>
+
+<h3>Configure for multiple environments</h3>
+
+<p>The configuration file is a simple YAML file that can have one or more environment definitions.</p>
+<pre class="brush: yaml; gutter: false; toolbar: false; class-name: 'codeblock'">
+production:
+  provider: openstack
+  auth_service:
+    name: identity
+    host_uri: 'http://my.openstackenv.org:5000'
+    request: create_token
+    validator: list_tenants
+    api_version: v2
+  auth_credentials:
+    username: myusername
+    password: mypassword
+    tenantName: myproject
+
+development:
+  provider: openstack
+  auth_service:
+    name: identity
+    host_uri: 'http://devstack:5000/v2.0'
+    request: create_token
+    validator: list_tenants
+  auth_credentials:
+    tokenId: 2c963f5512d067b24fdc312707c80c7a6d3d261b
+    tenantName: admin
+</pre>
+
+<p>The <code>auth_credentials</code> in the config file are optional or can be overridden during authentication:</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session.authenticate do |credentials|
+  credentials[:username]   = myusername
+  credentials[:password]   = mypassword
+  credentials[:tenantName] = tenantName
+end
+</pre>
+
+<p>Aviator uses parameter names as defined in the official OpenStack API doc. You can 
+also access the params via dot notation (e.g. <code>params.description</code>) or by using a 
+string for a hash key (e.g. <code>params['description']</code>). Keep in mind that 
+OpenStack parameters that have dashes and other characters that are not valid for method names
+and symbols can only be expressed as strings. E.g. <code>params['changes-since']</code>.</p>
+
+<h3>Browse the available requests</h3>
+
+<p>Aviator comes with a handy dandy command line interface called <code>describe</code> that allows you to inspect the available requests in the library:</p>
+
+<pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
+$ aviator describe openstack
+Available services for openstack:
+  compute
+  identity
+  image
+  metering
+  volume
+  
+$ aviator describe openstack compute
+Available requests for openstack compute_service:
+  v2 admin confirm_server_resize
+  v2 admin get_host_details
+  v2 admin list_hosts
+  v2 admin resize_server
+  v2 admin revert_server_resize
+  v2 public change_admin_password
+  v2 public create_image
+  v2 public create_server
+  ...
+  
+$ aviator describe openstack compute v2 public create_server
+Request: create_server
+
+Parameters:
+  (optional) accessIPv4
+  (optional) accessIPv6
+  (optional) adminPass
+  (required) flavorRef
+  (required) imageRef
+  (optional) metadata
+  (required) name
+  (optional) networks
+  (optional) personality
+
+Sample Code:
+  session.compute_service.request(:create_server, endpoint_type: 'public') do |params|
+     params['accessIPv4'] = value
+     params['accessIPv6'] = value
+     params['adminPass'] = value
+     params['metadata'] = value
+     params['networks'] = value
+     params['personality'] = value
+     params['imageRef'] = value
+     params['flavorRef'] = value
+     params['name'] = value
+  end
+
+Links:
+  documentation:
+    http://docs.openstack.org/api/openstack-compute/2/content/CreateServers.html
+</pre>
+
+<p>TIP: On OS X, command click on the link to open it in a browser.</p>
+
+<h3>...Or Read the Code Directly</h3>
+
+<p>We designed a DSL for the request files so that they are easy to read, easy to add to, and pretty much be self documenting (in fact, the same code is used by the <code>describe</code> CLI tool!). For instance, here is the actual code for the <code>create_server</code> request:</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+    module Aviator
+
+      define_request :create_server do
+
+        meta :provider,      :openstack
+        meta :service,       :compute
+        meta :api_version,   :v2
+        meta :endpoint_type, :public
+
+        link 'documentation',
+             'http://docs.openstack.org/api/openstack-compute/2/content/CreateServers.html'
+
+        param :accessIPv4,  required: false
+        param :accessIPv6,  required: false
+        param :adminPass,   required: false
+        param :imageRef,    required: true
+        param :flavorRef,   required: true
+        param :metadata,    required: false
+        param :name,        required: true
+        param :networks,    required: false
+        param :personality, required: false
+
+
+        def body
+          p = {
+            server: {
+              flavorRef: params[:flavorRef],
+              imageRef:  params[:imageRef],
+              name:      params[:name]
+            }
+          }
+
+          [:adminPass, :metadata, :personality, :networks, :accessIPv4, :accessIPv6].each do |key|
+            p[:server][key] = params[key] if params[key]
+          end
+
+          p
+        end
+
+
+        def headers
+          {}.tap do |h|
+            h['X-Auth-Token'] = session_data[:access][:token][:id] unless self.anonymous?
+          end
+        end
+
+
+        def http_method
+          :post
+        end
+
+
+        def url
+          "#{ url_for_endpoint(:public) }/servers"
+        end
+
+      end
+
+    end
+</pre>
+
+<p>Browse the rest of the request files <a href="https://github.com/aviator/aviator/tree/master/lib/aviator/openstack">here</a>.</p>
+
+<h3>Session Management Tools</h3>
+
+<p>Serialize the session information for caching. The output is in plaintext JSON which
+ contains sensitive information. You are responsible for securing that.</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+str = session.dump
+</pre>
+
+<p>Creating a new Session object from a session dump is just as easy.</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session = Aviator::Session.load(str)
+</pre>
+
+<p>This DOES NOT create a new token in the backend. If you employed any form of encryption on the string, make sure to decrypt it first!</p>
+
+<p>Depending on how old the loaded session dump is, its session data may already be expired. 
+Check if it's still current by calling <code>Session#validate</code> and reauthenticate as needed.</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session.authenticate unless session.validate
+</pre>
+
+<p>IMPORTANT: The validator must be defined in the config file and it must refer to the
+name of a request that is known to Aviator (<code>list_tenants</code> usually will do). See the configuration example above.</p>
+
+<p>If you want the newly deserialized session to log its output, make sure to indicate it on load</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session = Aviator::Session.load(
+            session_dump_str, 
+            log_file: 'path/to/aviator.log'
+          )
+</pre>
+
+<br/>
+
+<h3>Install It Now!</h3>
+
+Add this line to your application's Gemfile:
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+gem 'aviator'
+</pre>
+
+Or if you want to live on the edge:
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+gem 'aviator', :git => 'git@github.com:aviator/aviator.git', :branch => 'develop'
+</pre>
+
+And then execute:
+
+<pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
+$ bundle install
+</pre>
+
+Or install it yourself as:
+
+<pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
+$ gem install aviator
+</pre>
+
+<br/>
+
+<h3>Good to Know</h3>
+
+<p>In some instances, <code>Session::load</code> is inefficient because it creates a new session object
+each time. If object re-use is important to you, use <code>Session#load</code>
+(instance method, as opposed to class method). This will 'infect' an already existing
+session object with the supplied session dump and return itself instead of creating
+a brand new session object.
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session.load(other_session_dump)
+</pre>
+
+<p>You can choose to be explicit about the endpoint type. Useful in those rare instances when
+the same request name means differently depending on the endpoint type.
+For example, in OpenStack, <code>:list_tenants</code> will return only the tenants the
+user is a member of in the public endpoint whereas the admin endpoint will
+return all tenants in the system.</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+response = keystone.request(:list_tenants, endpoint_type: 'admin')
+</pre>
+
+<p>In the configuration file, the validator can be any request name as long as:</p>
+
+    <ul>
+        <li>It is defined in Aviator</li>
+        <li>Does not require any parameters</li>
+        <li>It returns an HTTP status 200 or 203 to indicate auth info validity.</li>
+        <li>It returns any other HTTP status to indicate that the auth info is invalid.</li>
+    </ul>
+
+<br/>
+
+<h3>Useful Links</h3>
+
+<ul>
+    <li><a href="https://github.com/aviator/aviator">The code at Github</a></li>
+    <li><a href="https://github.com/aviator/aviator/issues?state=open">Bug tracker</a></li>
+    <li><a href="https://github.com/aviator/aviator/wiki">Wiki</a></li>
+    <li><a href="https://github.com/aviator/www">The code for this website</a></li>
+</ul>
+
+<br/>
+
+<h3>Project Stats</h3>
+
+<p id="badges"><a href="https://travis-ci.org/aviator/aviator"><img src="https://travis-ci.org/aviator/aviator.png?branch=master" alt="Build Status" style="max-width:100%;"></a>
+<a href="https://coveralls.io/r/aviator/aviator?branch=master"><img src="https://coveralls.io/repos/aviator/aviator/badge.png?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
+<a href="https://codeclimate.com/github/aviator/aviator"><img src="https://codeclimate.com/github/aviator/aviator.png" alt="Code Climate" style="max-width:100%;"></a>
+<a href="http://badge.fury.io/rb/aviator"><img src="https://badge.fury.io/rb/aviator.png" alt="Gem Version" style="max-width:100%;"></a>
+<a href="https://gemnasium.com/aviator/aviator"><img src="https://gemnasium.com/aviator/aviator.png" alt="Dependency Status" style="max-width:100%;"></a></p>
+
+
+        </section>
+
+        <footer>
+          Aviator is maintained by <a href="https://github.com/relaxdiego">relaxdiego</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+      </div>
+    </div>
+    <script type="text/javascript">
+         SyntaxHighlighter.all()
+    </script>
+  </body>
+</html>
