@@ -33,12 +33,8 @@
         <hr>
 
         <section id="main_content">
-<p>Aviator is designed to be a thin wrapper for the OpenStack API so that you only need to consult
-the OpenStack API documents instead of jumping between that and the Aviator API docs when you code.</p>
-
-<br/>
-
-<h3>Get Started Quickly</h3>
+<p>Aviator is designed to be a thin wrapper for the OpenStack API so that's easy
+to get started with and requires minimal reading to get the hang of.</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 require 'aviator'
@@ -167,65 +163,60 @@ Links:
 <p>We designed a DSL for the request definition files so that they are easy to read, easy to add to, and pretty much be self documenting (in fact, the same code is used by the <code>describe</code> CLI tool). For instance, here is the actual code for the <code>create_server</code> request:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-    module Aviator
+module Aviator
 
-      define_request :create_server do
+  define_request :create_server, inherit: [:openstack, :common, :v2, :public, :base] do
 
-        meta :provider,      :openstack
-        meta :service,       :compute
-        meta :api_version,   :v2
-        meta :endpoint_type, :public
+    meta :service, :compute
 
-        link 'documentation',
-             'http://docs.openstack.org/api/openstack-compute/2/content/CreateServers.html'
+    link 'documentation',
+         'http://docs.openstack.org/api/openstack-compute/2/content/CreateServers.html'
 
-        param :accessIPv4,  required: false
-        param :accessIPv6,  required: false
-        param :adminPass,   required: false
-        param :imageRef,    required: true
-        param :flavorRef,   required: true
-        param :metadata,    required: false
-        param :name,        required: true
-        param :networks,    required: false
-        param :personality, required: false
+    param :accessIPv4,  required: false
+    param :accessIPv6,  required: false
+    param :adminPass,   required: false
+    param :imageRef,    required: true
+    param :flavorRef,   required: true
+    param :metadata,    required: false
+    param :name,        required: true
+    param :networks,    required: false
+    param :personality, required: false
 
 
-        def body
-          p = {
-            server: {
-              flavorRef: params[:flavorRef],
-              imageRef:  params[:imageRef],
-              name:      params[:name]
-            }
-          }
+    def body
+      p = {
+        server: {
+          flavorRef: params[:flavorRef],
+          imageRef:  params[:imageRef],
+          name:      params[:name]
+        }
+      }
 
-          [:adminPass, :metadata, :personality, :networks, :accessIPv4, :accessIPv6].each do |key|
-            p[:server][key] = params[key] if params[key]
-          end
-
-          p
-        end
-
-
-        def headers
-          {}.tap do |h|
-            h['X-Auth-Token'] = session_data[:access][:token][:id] unless self.anonymous?
-          end
-        end
-
-
-        def http_method
-          :post
-        end
-
-
-        def url
-          "#{ url_for_endpoint(:public) }/servers"
-        end
-
+      [:adminPass, :metadata, :personality, :networks, :accessIPv4, :accessIPv6].each do |key|
+        p[:server][key] = params[key] if params[key]
       end
 
+      p
     end
+
+
+    def headers
+      super
+    end
+
+
+    def http_method
+      :post
+    end
+
+
+    def url
+      "#{ base_url_for :public }/servers"
+    end
+
+  end
+
+end
 </pre>
 
 <p>Browse the rest of the request files <a href="https://github.com/aviator/aviator/tree/master/lib/aviator/openstack">here</a>.</p>
@@ -270,25 +261,25 @@ session = Aviator::Session.load(
 
 <h3>Install It Now!</h3>
 
-Add this line to your application's Gemfile:
+<p>Add this line to your application's Gemfile:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 gem 'aviator'
 </pre>
 
-Or if you want to live on the edge:
+<p>Or if you want to live on the edge:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 gem 'aviator', :git => 'git@github.com:aviator/aviator.git', :branch => 'develop'
 </pre>
 
-And then execute:
+<p>And then execute:</p>
 
 <pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
 $ bundle install
 </pre>
 
-Or install it yourself as:
+<p>Or install it yourself as:</p>
 
 <pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
 $ gem install aviator
