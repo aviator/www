@@ -28,13 +28,11 @@
 
         <header>
           <img src="images/logo-large-alpha.png"/>
-          <h2>A lightweight Ruby library for working with the OpenStack API</h2>
+          <h2>A lightweight Ruby library for coding on top of OpenStack</h2>
         </header>
         <hr>
 
         <section id="main_content">
-<p>Aviator is designed to be a thin wrapper for the OpenStack API that requires minimal reading to get the hang of.</p>
-
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 require 'aviator'
 
@@ -93,10 +91,7 @@ end
 </pre>
 
 <p>Aviator uses parameter names as defined in the official OpenStack API doc. You can 
-also access the params via dot notation (e.g. <code>params.description</code>) or by using a 
-string for a hash key (e.g. <code>params['description']</code>). Keep in mind that 
-OpenStack parameters that have dashes and other characters that are not valid for method names
-and symbols can only be expressed as strings. E.g. <code>params['changes-since']</code>.</p>
+also access the params via symbols (e.g. <code>params[:description]</code>) or strings (e.g. <code>params['description']</code>). Keep in mind that OpenStack parameters that have dashes and other characters that are not valid for method names and symbols can only be expressed as strings. E.g. <code>params['changes-since']</code>.</p>
 
 <h3>Browse the available requests</h3>
 
