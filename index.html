@@ -64,9 +64,8 @@ production:
     validator: list_tenants
     api_version: v2
   auth_credentials:
-    username: myusername
-    password: mypassword
-    tenantName: myproject
+    tokenId: 2c963f5512d067b24fdc312707c80c7a6d3d261b
+    tenantName: admin
 
 development:
   provider: openstack
@@ -76,8 +75,9 @@ development:
     request: create_token
     validator: list_tenants
   auth_credentials:
-    tokenId: 2c963f5512d067b24fdc312707c80c7a6d3d261b
-    tenantName: admin
+    username: myusername
+    password: mypassword
+    tenantName: myproject
 </pre>
 
 <p>The <code>auth_credentials</code> in the config file are optional or can be overridden during authentication:</p>
