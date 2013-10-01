@@ -90,9 +90,6 @@ session.authenticate do |params|
 end
 </pre>
 
-<p>Aviator uses parameter names as defined in the official OpenStack API doc. You can 
-also access the params via symbols (e.g. <code>params[:description]</code>) or strings (e.g. <code>params['description']</code>). Keep in mind that OpenStack parameters that have dashes and other characters that are not valid for method names and symbols can only be expressed as strings. E.g. <code>params['changes-since']</code>.</p>
-
 <h3>Browse the available requests</h3>
 
 <p>Aviator comes with a handy dandy command line interface called <code>describe</code> that allows you to inspect the available requests in the library:</p>
@@ -122,27 +119,31 @@ $ aviator describe openstack compute v2 public create_server
 Request: create_server
 
 Parameters:
-  (optional) accessIPv4
-  (optional) accessIPv6
-  (optional) adminPass
-  (required) flavorRef
-  (required) imageRef
-  (optional) metadata
-  (required) name
-  (optional) networks
-  (optional) personality
+ +-------------+----------+-------------+
+ | NAME        | REQUIRED | ALIAS       |
+ +-------------+----------+-------------+
+ | accessIPv4  |    N     | access_ipv4 |
+ | accessIPv6  |    N     | access_ipv6 |
+ | adminPass   |    N     | admin_pass  |
+ | flavorRef   |    Y     | flavor_ref  |
+ | imageRef    |    Y     | image_ref   |
+ | metadata    |    N     |             |
+ | name        |    Y     |             |
+ | networks    |    N     |             |
+ | personality |    N     |             |
+ +-------------+----------+-------------+
 
 Sample Code:
-  session.compute_service.request(:create_server, endpoint_type: 'public') do |params|
-     params['accessIPv4'] = value
-     params['accessIPv6'] = value
-     params['adminPass'] = value
-     params['metadata'] = value
-     params['networks'] = value
-     params['personality'] = value
-     params['imageRef'] = value
-     params['flavorRef'] = value
-     params['name'] = value
+  session.compute_service.request(:create_server) do |params|
+    params.access_ipv4 = value
+    params.access_ipv6 = value
+    params.admin_pass = value
+    params.metadata = value
+    params.networks = value
+    params.personality = value
+    params.image_ref = value
+    params.flavor_ref = value
+    params.name = value
   end
 
 Links:
