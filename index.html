@@ -36,15 +36,15 @@
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 require 'aviator'
 
-session = Aviator::Session.new(
-            :config_file => 'path/to/aviator.yml',
-            :environment => :production,
-            :log_file    => 'path/to/aviator.log'
-          )
+openstack = Aviator::Session.new(
+              :config_file => 'path/to/aviator.yml',
+              :environment => :production,
+              :log_file    => 'path/to/aviator.log'
+            )
 
-session.authenticate
+openstack.authenticate
 
-keystone = session.identity_service
+keystone = openstack.identity_service
 response = keystone.request(:list_tenants)
 puts response.body
 </pre>
@@ -88,7 +88,7 @@ development:
 <p>You can provide the <code>auth_credentials</code> during authentication:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session.authenticate do |params|
+openstack.authenticate do |params|
   params.username    = 'myusername'
   params.password    = 'mypassword'
   params.tenant_name = 'mytenant'
@@ -117,14 +117,14 @@ configuration = {
   }
 }
 
-session = Aviator::Session.new(
-            :config   =>  configuration,
-            :log_file => 'path/to/aviator.log'
-          )
+openstack = Aviator::Session.new(
+              :config   =>  configuration,
+              :log_file => 'path/to/aviator.log'
+            )
 
-session.authenticate
+openstack.authenticate
 
-keystone = session.identity_service
+keystone = openstack.identity_service
 response = keystone.request(:list_tenants)
 puts response.body
 </pre>
@@ -262,6 +262,7 @@ end
  contains sensitive information. You are responsible for securing that.</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+session = Aviator::Session.new( ... )
 str = session.dump
 </pre>
 
