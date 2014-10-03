@@ -129,6 +129,43 @@ response = keystone.request(:list_tenants)
 puts response.body
 </pre>
 
+<h3>Use the Service Token Directly</h3>
+
+<p>Do you want to use Aviator for seeding OpenStack? No problem! 
+Use the service token directly in your requests. No authentication needed.</p>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+require 'aviator'
+
+configuration = {
+  :provider => 'openstack'
+}
+
+openstack = Aviator::Session.new(
+              :config   =>  configuration,
+              :log_file => 'path/to/aviator.log'
+            )
+
+keystone = openstack.identity_service
+
+session_data = {
+  :base_url      => 'http://example.com',
+  :service_token => 'service-token-created-at-openstack-install-time'
+}
+
+response = keystone.request(:create_tenant, :api_version => :v2, :session_data => session_data) do |params|
+  params.name        = 'Tenant A'
+  params.description = 'First Tenant!'
+  params.enabled     = true
+end
+
+puts response.status
+</pre>
+
+<p>Note how we're also providing a :base_url in our session_data variable above.
+This is necessary since we normally get the service endpoints from Keystone when
+we authenticate. Since we are not authenticating against Keystone, then we don't
+have that catalogue to begin with. Thus the need to hardcode it in the request.</p>
 
 <h3>Browse the available requests</h3>
 
