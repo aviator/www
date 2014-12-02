@@ -38,8 +38,7 @@ require 'aviator'
 
 openstack = Aviator::Session.new(
               :config_file => 'path/to/aviator.yml',
-              :environment => :production,
-              :log_file    => 'path/to/aviator.log'
+              :environment => :production
             )
 
 openstack.authenticate
@@ -82,6 +81,18 @@ development:
 </pre>
 
 <p>The <code>auth_credentials</code> in the config file are optional.</p>
+
+<h3>Optionally specify a log file for better debugging</h3>
+
+<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+openstack = Aviator::Session.new(
+              :config_file => 'path/to/aviator.yml',
+              :environment => :production,
+              :log_file    => 'path/to/aviator.log'
+            )
+</pre>
+
+<br/>
 
 <h3>Supply credentials at runtime</h3>
 
