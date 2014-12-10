@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module Aviator::Openstack::Provider - RDoc Documentation</title>
+
+<link href="../../fonts.css" rel="stylesheet">
+<link href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/navigation.js"></script>
+<script src="../../js/search_index.js"></script>
+<script src="../../js/search.js"></script>
+<script src="../../js/searcher.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-Aviator::Openstack::Provider">
+  <h1 id="module-Aviator::Openstack::Provider" class="module">
+    module Aviator::Openstack::Provider
+  </h1>
+
+  <section class="description">
+    
+<p>Manages a provider (e.g. OpenStack) session.</p>
+<dl class="rdoc-list note-list"><dt>Author
+<dd>
+<p>Mark Maglana (mmaglana@gmail.com)</p>
+</dd><dt>Copyright
+<dd>
+<p>Copyright © 2014 Mark Maglana</p>
+</dd><dt>License
+<dd>
+<p>Distributed under the MIT license</p>
+</dd><dt>Homepage
+<dd>
+<p><a href="http://aviator.github.io/www">aviator.github.io/www</a>/</p>
+</dd></dl>
+
+<p><strong>Request Options</strong></p>
+
+<p>The following options may be used in combination with each other when
+calling an OpenStack request class</p>
+<dl class="rdoc-list note-list"><dt>:api_version =&gt; :v2
+<dd>
+<p>Forces <a href="../../Aviator.html">Aviator</a> to use the request class
+for the v2 API. For any other version, replace Note that this may throw an
+error if no such request class exists. If you want to globally specify the
+API version to use for a specific service, declare it in your config file
+under the correct environment. For example:</p>
+</dd></dl>
+
+<pre>production:
+  provider: openstack
+  ...
+  compute_service:
+     api_version: v2</pre>
+
+<p>Note that the <code>:api_version</code> option overrides whatever is
+declared in the configuration.</p>
+<dl class="rdoc-list note-list"><dt>:endpoint_type =&gt; (:public|:admin)
+<dd>
+<p>This allows you to be specific about the endpoint type in cases where two
+request classes under admin and public endpoints of the same service share
+the same name. This is true, for example, for the :list_tenants request of
+the identity service&#39;s v2 API. Its public endpoint will return only the
+tenants the user is a member of whereas the admin endpoint will return all
+tenants in the system.</p>
+</dd><dt>:session_data =&gt; Hash
+<dd>
+<p>Under normal situations, you wouldn&#39;t need to use this as it is
+automatically populated by the <a href="../Session.html">Session</a> object
+provided it is authenticated. The specific use case when you&#39;d need to
+set thsi optin is when you want to use <a
+href="../../Aviator.html">Aviator</a> to seed your OpenStack installation.
+In such a scenario, you would need to use a service token since no
+usernames and tenants would exist yet in the environment. To use a service
+token with <a href="../../Aviator.html">Aviator</a>, you will need to write
+something similar to the following example:</p>
+</dd></dl>
+
+<pre class="ruby"><span class="ruby-identifier">openstack</span> = <span class="ruby-constant">Aviator</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">config</span> =<span class="ruby-operator">&gt;</span> { :<span class="ruby-identifier">provider</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;openstack&#39;</span>})
+
+<span class="ruby-identifier">session_data</span> = {:<span class="ruby-identifier">base_url</span>      =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://example.com&#39;</span>,
+                :<span class="ruby-identifier">service_token</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;service-token-created-at-openstack-install-time&#39;</span>}
+
+<span class="ruby-identifier">openstack</span>.<span class="ruby-identifier">request</span> :<span class="ruby-identifier">identity</span>, :<span class="ruby-identifier">create_tenant</span>, :<span class="ruby-identifier">api_version</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">v2</span>, :<span class="ruby-identifier">session_data</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">session_data</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">params</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">name</span>        = <span class="ruby-string">&#39;Tenant A&#39;</span>
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">description</span> = <span class="ruby-string">&#39;First Tenant!&#39;</span>
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">enabled</span>     = <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Notice how the above code skips authentication. This is because the service
+token is pre-validated and ready for use with any request. Also note how
+we&#39;re providing a <code>:base_url</code> member in our session data.
+This is necessary since we normally get the service endpoints from Keystone
+when we authenticate. Now since we are not authenticating against Keystone,
+we don&#39;t have that catalogue to begin with. Thus the need to hardcode
+it in the request.</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://rdoc.rubyforge.org">RDoc</a> 4.1.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
