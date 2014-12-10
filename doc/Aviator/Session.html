@@ -89,8 +89,6 @@
     
     <li ><a href="#method-i-log_file">#log_file</a>
     
-    <li class="calls-super" ><a href="#method-i-method_missing">#method_missing</a>
-    
     <li ><a href="#method-i-request">#request</a>
     
     <li ><a href="#method-i-validate">#validate</a>
@@ -108,7 +106,9 @@
 
   <section class="description">
     
-<p>Manages a provider (e.g. OpenStack) session.</p>
+<p>Manages a provider (e.g. OpenStack) session and serves as the entry point
+for a consumer class/object. See <a
+href="Session.html#method-c-new">::new</a> for notes on usage.</p>
 
   </section>
 
@@ -148,8 +148,8 @@
 session&#39;s dump. See <a href="Session.html#method-i-dump">#dump</a> for
 more information.</p>
 
-<p>If you want the newly deserialized session to log its output, make sure to
-indicate it on load</p>
+<p>If you want the newly deserialized session to log its output, add a
+<code>:log_file</code> option.</p>
 
 <pre class="ruby"><span class="ruby-constant">Aviator</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">session_dump_str</span>, :<span class="ruby-identifier">log_file</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;path/to/aviator.log&#39;</span>)
 </pre>
@@ -158,7 +158,7 @@ indicate it on load</p>
 
           
           <div class="method-source-code" id="load-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 285</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 304</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">session_dump</span>, <span class="ruby-identifier">opts</span>={})
   <span class="ruby-identifier">opts</span>[<span class="ruby-value">:session_dump</span>] = <span class="ruby-identifier">session_dump</span>
 
@@ -187,8 +187,7 @@ indicate it on load</p>
 
         <div class="method-description">
           
-          <p>Create a new <a href="Session.html">Session</a> instance with options
-provided in <code>opts</code> which can have many forms discussed below.</p>
+          <p>Create a new <a href="Session.html">Session</a> instance.</p>
 
 <p><strong>Initialize with a config file</strong></p>
 
@@ -210,18 +209,24 @@ provided in <code>opts</code> which can have many forms discussed below.</p>
     password: mypassword
     tenant_name: myproject</pre>
 
+<p><strong>SIDENOTE:</strong> For more information about the
+<code>validator</code> member, see <a
+href="Session.html#method-i-validate">#validate</a>.</p>
+
 <p>Once the session has been instantiated, you may authenticate against the
 provider as follows:</p>
 
 <pre>session.authenticate</pre>
 
-<p>Note that the required items under <code>auth_credentials</code> in the
-config file depends on the required parameters of the request class
-declared under <code>auth_service</code>. If writing the
-<code>auth_credentials</code> in the config file is not acceptable, you may
-omit it and just supply the credentials at runtime. For instance, assume
-that the <code>auth_credentials</code> section in the config file above is
-missing. You would then authenticate as follows:</p>
+<p>The members you put under <code>auth_credentials</code> will depend on the
+request class you declare under <code>auth_service:request</code> and what
+parameters it accepts. To know more about a request class and its
+parameters, you can use the CLI tool <code>aviator describe</code> or view
+the request definition file directly.</p>
+
+<p>If writing the <code>auth_credentials</code> in the config file is not
+acceptable, you may omit it and just supply the credentials at runtime. For
+example:</p>
 
 <pre class="ruby"><span class="ruby-identifier">session</span>.<span class="ruby-identifier">authenticate</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">params</span><span class="ruby-operator">|</span>
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">username</span>    = <span class="ruby-constant">ARGV</span>[<span class="ruby-value">0</span>]
@@ -230,8 +235,8 @@ missing. You would then authenticate as follows:</p>
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>Please see <a href="Session.html#method-i-authenticate">#authenticate</a>
-for more info.</p>
+<p>See <a href="Session.html#method-i-authenticate">#authenticate</a> for more
+info.</p>
 
 <p>Note that while the example config file above only has one environment
 (production), you can declare an arbitrary number of environments in your
@@ -240,9 +245,8 @@ config file. Shifting between environments is as simple as changing the
 
 <p><strong>Initialize with an in-memory hash</strong></p>
 
-<p>You can create an in-memory hash which is similar in structure to the
-config file except that you don&#39;t need to specify an environment name.
-For example:</p>
+<p>You can create an in-memory hash with a structure similar to the config
+file but without the environment name. For example:</p>
 
 <pre class="ruby"><span class="ruby-identifier">configuration</span> = {
   :<span class="ruby-identifier">provider</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;openstack&#39;</span>,
@@ -286,7 +290,7 @@ given path. For example:</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 139</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 142</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">opts</span>={})
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-value">:session_dump</span>
     <span class="ruby-identifier">initialize_with_dump</span>(<span class="ruby-identifier">opts</span>[<span class="ruby-value">:session_dump</span>])
@@ -331,14 +335,15 @@ given path. For example:</p>
 
         <div class="method-description">
           
-          <p>Authenticates against the auth_service request class declared in the
-session&#39;s configuration during initialization. Please see <a
+          <p>Authenticates against the backend provider using the auth_service request
+class declared in the session&#39;s configuration. Please see <a
 href="Session.html#method-c-new">::new</a> for more information on
 declaring the request class to use for authentication.</p>
 
-<p>If the auth_service request class accepts a parameter block, you may also
-supply that when calling this method and it will be directly passed to the
-request. For example:</p>
+<p><strong>Request params block</strong></p>
+
+<p>If the auth_service request class accepts parameters, you may supply that
+as a block and it will be directly passed to the request. For example:</p>
 
 <pre class="ruby"><span class="ruby-identifier">session</span> = <span class="ruby-constant">Aviator</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">config</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">config</span>)
 <span class="ruby-identifier">session</span>.<span class="ruby-identifier">authenticate</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">params</span><span class="ruby-operator">|</span>
@@ -348,11 +353,13 @@ request. For example:</p>
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>Expects an HTTP status 200 or 201. Any other status is treated as a
-failure.</p>
+<p>If your configuration happens to have an <code>auth_credentials</code> in
+it, those will be overridden by this block.</p>
 
-<p>Note that you can also treat the block&#39;s argument like a hash with the
-attribute names as the keys. For example, we can rewrite the above as:</p>
+<p><strong>Treat parameters as a hash</strong></p>
+
+<p>You can also treat the params struct like a hash with the attribute names
+as the keys. For example, we can rewrite the above as:</p>
 
 <pre class="ruby"><span class="ruby-identifier">session</span> = <span class="ruby-constant">Aviator</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">config</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">config</span>)
 <span class="ruby-identifier">session</span>.<span class="ruby-identifier">authenticate</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">params</span><span class="ruby-operator">|</span>
@@ -364,10 +371,13 @@ attribute names as the keys. For example, we can rewrite the above as:</p>
 
 <p>Keys can be symbols or strings.</p>
 
-<p>You may also provide parameters as an argument instead of a block. This is
-especially useful when mocking <a href="../Aviator.html">Aviator</a> as
-it&#39;s easier to specify ordinary argument expectations over blocks.
-Further rewriting the example above, we end up with:</p>
+<p><strong>Use a hash argument instead of a block</strong></p>
+
+<p>You may also provide request params as an argument instead of a block. This
+is especially useful if you want to mock <a
+href="../Aviator.html">Aviator</a> as it&#39;s easier to specify ordinary
+argument expectations over blocks. Further rewriting the example above, we
+end up with:</p>
 
 <pre class="ruby"><span class="ruby-identifier">session</span> = <span class="ruby-constant">Aviator</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">config</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">config</span>)
 <span class="ruby-identifier">session</span>.<span class="ruby-identifier">authenticate</span> :<span class="ruby-identifier">params</span> =<span class="ruby-operator">&gt;</span> {
@@ -379,12 +389,17 @@ Further rewriting the example above, we end up with:</p>
 
 <p>If both <code>:params</code> and a block are provided, the
 <code>:params</code> values will be used and the block ignored.</p>
+
+<p><strong>Success requirements</strong></p>
+
+<p>Expects an HTTP status 200 or 201 response from the backend. Any other
+status is treated as a failure.</p>
           
           
 
           
           <div class="method-source-code" id="authenticate-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 197</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 212</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">authenticate</span>(<span class="ruby-identifier">opts</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">block</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">params</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">config</span>[<span class="ruby-value">:auth_credentials</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
@@ -432,13 +447,18 @@ Further rewriting the example above, we end up with:</p>
 
         <div class="method-description">
           
-          <p>Returns true if the session has been authenticated.</p>
+          <p>Returns true if the session has been authenticated. Note that this relies
+on cached response from a previous run of <a
+href="Session.html#method-i-authenticate">#authenticate</a> if one was
+made. If you want to check against the backend provider if the session is
+still valid, use <a href="Session.html#method-i-validate">#validate</a>
+instead.</p>
           
           
 
           
           <div class="method-source-code" id="authenticated-3F-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 225</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 243</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">authenticated?</span>
   <span class="ruby-operator">!</span><span class="ruby-identifier">auth_response</span>.<span class="ruby-identifier">nil?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -471,7 +491,7 @@ Further rewriting the example above, we end up with:</p>
 
           
           <div class="method-source-code" id="config-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 232</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 250</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">config</span>
   <span class="ruby-ivar">@config</span>
 <span class="ruby-keyword">end</span></pre>
@@ -514,7 +534,7 @@ href="Session.html">Session</a> instance. For example:</p>
 
           
           <div class="method-source-code" id="dump-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 247</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 265</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dump</span>
   <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">generate</span>({
     <span class="ruby-value">:config</span>        =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">config</span>,
@@ -552,7 +572,7 @@ of creating a new one.</p>
 
           
           <div class="method-source-code" id="load-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 259</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 277</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">load</span>(<span class="ruby-identifier">session_dump</span>)
   <span class="ruby-identifier">initialize_with_dump</span>(<span class="ruby-identifier">session_dump</span>)
   <span class="ruby-identifier">update_services_session_data</span>
@@ -588,53 +608,9 @@ initialization.</p>
 
           
           <div class="method-source-code" id="log_file-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 295</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 314</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">log_file</span>
   <span class="ruby-ivar">@log_file</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-method_missing" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">method_missing</span><span
-            class="method-args">(name, *args, &block)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-            <div class="method-calls-super">
-              Calls superclass method
-              
-            </div>
-          
-
-          
-          <div class="method-source-code" id="method_missing-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 266</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span>(<span class="ruby-identifier">name</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
-  <span class="ruby-identifier">service_name_parts</span> = <span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^(\w+)_service$/</span>)
-
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">service_name_parts</span>
-    <span class="ruby-identifier">get_service_obj</span>(<span class="ruby-identifier">service_name_parts</span>[<span class="ruby-value">1</span>])
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">super</span> <span class="ruby-identifier">name</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
-  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -650,7 +626,7 @@ initialization.</p>
         
         <div class="method-heading">
           <span class="method-name">request</span><span
-            class="method-args">(service_name, request_name, opts={}, &params)</span>
+            class="method-args">(service_name, request_name, opts={}, &block)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -693,8 +669,8 @@ Further rewriting the example above, we end up with:</p>
 }
 </pre>
 
-<p>If both <code>:params</code> and a block are provided, the
-<code>:params</code> values will be used and the block ignored.</p>
+<p>If both <code>:params</code> and a block are provided, the values in
+<code>:params</code> will be used and the block ignored.</p>
 
 <p><strong>Return Value</strong></p>
 
@@ -721,11 +697,13 @@ vary depending on the provider and the request that was made.</p>
 
 <p><strong>Request Options</strong></p>
 
-<p>You can further customize how the request is fulfilled by providing one or
-more options to the method call. For example, the following ensures that
-the request will call the :create_server request for the v1 API.</p>
+<p>You can further customize how the method behaves by providing one or more
+options to the call. For example, assuming you are using the
+<code>openstack</code> provider, the following will call the
+<code>:create_server</code> request of the v1 API of
+<code>:compute_service</code>.</p>
 
-<pre class="ruby"><span class="ruby-identifier">session</span>.<span class="ruby-identifier">request</span> :<span class="ruby-identifier">compute_service</span>, :<span class="ruby-identifier">create_server</span>, :<span class="ruby-identifier">api_version</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">v1</span>
+<pre class="ruby"><span class="ruby-identifier">session</span>.<span class="ruby-identifier">request</span> :<span class="ruby-identifier">compute_service</span>, :<span class="ruby-identifier">create_server</span>, :<span class="ruby-identifier">api_version</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">v1</span>, :<span class="ruby-identifier">params</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">params</span>
 </pre>
 
 <p>The available options vary depending on the provider. See the documentation
@@ -736,10 +714,10 @@ href="Openstack/Provider.html">Aviator::Openstack::Provider</a>)</p>
 
           
           <div class="method-source-code" id="request-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 366</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">request</span>(<span class="ruby-identifier">service_name</span>, <span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">opts</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">params</span>)
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 386</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">request</span>(<span class="ruby-identifier">service_name</span>, <span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">opts</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">service</span> = <span class="ruby-identifier">send</span>(<span class="ruby-node">&quot;#{service_name.to_s}_service&quot;</span>)
-  <span class="ruby-identifier">response</span> = <span class="ruby-identifier">service</span>.<span class="ruby-identifier">request</span>(<span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">opts</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">params</span>)
+  <span class="ruby-identifier">response</span> = <span class="ruby-identifier">service</span>.<span class="ruby-identifier">request</span>(<span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">opts</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">response</span>.<span class="ruby-identifier">to_hash</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -766,11 +744,13 @@ href="Openstack/Provider.html">Aviator::Openstack::Provider</a>)</p>
         <div class="method-description">
           
           <p>Returns true if the session is still valid in the underlying provider. This
-method does this by calling the validator request class declared declared
-under <code>auth_service</code> in the configuration. The validator can be
-any request class as long as:</p>
+method calls the <code>validator</code> request class declared under
+<code>auth_service</code> in the configuration. The validator can be any
+request class as long as:</p>
 <ul><li>
 <p>The request class exists!</p>
+</li><li>
+<p>Is not an anonymous request. Otherwise it will always return true.</p>
 </li><li>
 <p>Does not require any parameters</p>
 </li><li>
@@ -781,12 +761,19 @@ any request class as long as:</p>
 
 <p>See <a href="Session.html#method-c-new">::new</a> for an example on how to
 specify the request class to use for session validation.</p>
+
+<p>Note that this method requires the session to be previously authenticated
+otherwise a <a
+href="Session/NotAuthenticatedError.html">NotAuthenticatedError</a> will be
+raised. If you just want to check if the session was previously
+authenticated, use <a
+href="Session.html#method-i-authenticated-3F">#authenticated?</a> instead.</p>
           
           
 
           
           <div class="method-source-code" id="validate-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 385</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/session.rb, line 410</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">validate</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">NotAuthenticatedError</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">authenticated?</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ValidatorNotDefinedError</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">config</span>[<span class="ruby-value">:auth_service</span>][<span class="ruby-value">:validator</span>]
