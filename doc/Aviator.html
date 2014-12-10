@@ -116,9 +116,19 @@
   </h1>
 
   <section class="description">
-    
-<p>Original work by Stephen Paul Suarez <a
-href="https://github.com/musashi-dev/aviator/blob/develop/lib/aviator/openstack/identity/v3/public/create_token.rb">github.com/musashi-dev/aviator/blob/develop/lib/aviator/openstack/identity/v3/public/create_token.rb</a></p>
+    <dl class="rdoc-list note-list"><dt>Author
+<dd>
+<p>Mark Maglana (mmaglana@gmail.com)</p>
+</dd><dt>Copyright
+<dd>
+<p>Copyright © 2014 Mark Maglana</p>
+</dd><dt>License
+<dd>
+<p>Distributed under the MIT license</p>
+</dd><dt>Homepage
+<dd>
+<p><a href="http://aviator.github.io/www">aviator.github.io/www</a>/</p>
+</dd></dl>
 
   </section>
 
@@ -308,7 +318,7 @@ href="http://stackoverflow.com/a/14773555/402145">stackoverflow.com/a/14773555/4
 
           
           <div class="method-source-code" id="compact_hash-source">
-            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 46</span>
+            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 45</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">compact_hash</span>(<span class="ruby-identifier">hash</span>, <span class="ruby-identifier">opts</span> = {})
   <span class="ruby-identifier">opts</span>[<span class="ruby-value">:recurse</span>] <span class="ruby-operator">||=</span> <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">inject</span>({}) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">new_hash</span>, (<span class="ruby-identifier">k</span>,<span class="ruby-identifier">v</span>)<span class="ruby-operator">|</span>
@@ -380,7 +390,7 @@ href="http://stackoverflow.com/a/14773555/402145">stackoverflow.com/a/14773555/4
 
           
           <div class="method-source-code" id="domain_hash-source">
-            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 57</span>
+            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">domain_hash</span>
   <span class="ruby-identifier">compact_hash</span>({
     <span class="ruby-value">:id</span>   =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:domain_id</span>],
@@ -743,7 +753,7 @@ href="http://stackoverflow.com/a/14773555/402145">stackoverflow.com/a/14773555/4
 
           
           <div class="method-source-code" id="password_auth_body-source">
-            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 65</span>
+            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 64</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">password_auth_body</span>
   <span class="ruby-identifier">p</span> = {
     <span class="ruby-value">:auth</span> =<span class="ruby-operator">&gt;</span> {
@@ -798,7 +808,7 @@ href="http://stackoverflow.com/a/14773555/402145">stackoverflow.com/a/14773555/4
 
           
           <div class="method-source-code" id="scope_hash-source">
-            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 92</span>
+            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 91</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">scope_hash</span>
   <span class="ruby-identifier">p</span> = {}
 
@@ -844,7 +854,7 @@ href="http://stackoverflow.com/a/14773555/402145">stackoverflow.com/a/14773555/4
 
           
           <div class="method-source-code" id="token_auth_body-source">
-            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 110</span>
+            <pre><span class="ruby-comment"># File lib/aviator/openstack/identity/requests/v3/public/create_token.rb, line 109</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">token_auth_body</span>
   <span class="ruby-identifier">p</span> = {
     <span class="ruby-value">:auth</span> =<span class="ruby-operator">&gt;</span> {

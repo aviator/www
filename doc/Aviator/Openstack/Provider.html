@@ -71,21 +71,6 @@
 
   <section class="description">
     
-<p>Manages a provider (e.g. OpenStack) session.</p>
-<dl class="rdoc-list note-list"><dt>Author
-<dd>
-<p>Mark Maglana (mmaglana@gmail.com)</p>
-</dd><dt>Copyright
-<dd>
-<p>Copyright © 2014 Mark Maglana</p>
-</dd><dt>License
-<dd>
-<p>Distributed under the MIT license</p>
-</dd><dt>Homepage
-<dd>
-<p><a href="http://aviator.github.io/www">aviator.github.io/www</a>/</p>
-</dd></dl>
-
 <p><strong>Request Options</strong></p>
 
 <p>The following options may be used in combination with each other when
@@ -93,10 +78,11 @@ calling an OpenStack request class</p>
 <dl class="rdoc-list note-list"><dt>:api_version =&gt; :v2
 <dd>
 <p>Forces <a href="../../Aviator.html">Aviator</a> to use the request class
-for the v2 API. For any other version, replace Note that this may throw an
-error if no such request class exists. If you want to globally specify the
-API version to use for a specific service, declare it in your config file
-under the correct environment. For example:</p>
+for the v2 API. For any other version, replace :v2 with the desired one.
+Note that this may throw an error if no such request class for the given
+api version exists. If you want to globally specify the API version to use
+for a specific service, declare it in your config file under the correct
+environment. For example:</p>
 </dd></dl>
 
 <pre>production:
