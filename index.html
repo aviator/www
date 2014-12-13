@@ -42,11 +42,13 @@ openstack = Aviator::Session.new(
             )
 
 openstack.authenticate
+response = openstack.request :identity_service, :list_tenants
 
-keystone = openstack.identity_service
-response = keystone.request(:list_tenants)
-puts response.body
+puts response[:body]
 </pre>
+
+<p>See the <a href="doc/Aviator/Session.html">API docs</a> for more information
+on how to send requests.</a>
 
 <br/>
 
@@ -80,103 +82,9 @@ development:
     tenant_name: myproject
 </pre>
 
-<p>The <code>auth_credentials</code> in the config file are optional.</p>
-
-<h3>Optionally specify a log file for better debugging</h3>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-openstack = Aviator::Session.new(
-              :config_file => 'path/to/aviator.yml',
-              :environment => :production,
-              :log_file    => 'path/to/aviator.log'
-            )
-</pre>
-
-<br/>
-
-<h3>Supply credentials at runtime</h3>
-
-<p>You can provide the <code>auth_credentials</code> during authentication:</p>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-openstack.authenticate do |params|
-  params.username    = 'myusername'
-  params.password    = 'mypassword'
-  params.tenant_name = 'mytenant'
-end
-</pre>
-
-<h3>Configure with an in-memory hash</h3>
-
-<p>Configuration files not your thing? Give it a hash object instead.</p>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-require 'aviator'
-
-configuration = {
-  :provider => 'openstack',
-  :auth_service => {
-    :name      => 'identity',
-    :host_uri  => 'http://devstack:5000/v2.0',
-    :request   => 'create_token',
-    :validator => 'list_tenants'
-  },
-  :auth_credentials => {
-    :username    => 'myusername',
-    :password    => 'mypassword',
-    :tenant_name => 'myproject'
-  }
-}
-
-openstack = Aviator::Session.new(
-              :config   =>  configuration,
-              :log_file => 'path/to/aviator.log'
-            )
-
-openstack.authenticate
-
-keystone = openstack.identity_service
-response = keystone.request(:list_tenants)
-puts response.body
-</pre>
-
-<h3>Use the Service Token Directly</h3>
-
-<p>Do you want to use Aviator for seeding OpenStack? No problem! 
-Use the service token directly in your requests. No authentication needed.</p>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-require 'aviator'
-
-configuration = {
-  :provider => 'openstack'
-}
-
-openstack = Aviator::Session.new(
-              :config   =>  configuration,
-              :log_file => 'path/to/aviator.log'
-            )
-
-keystone = openstack.identity_service
-
-session_data = {
-  :base_url      => 'http://example.com',
-  :service_token => 'service-token-created-at-openstack-install-time'
-}
-
-response = keystone.request(:create_tenant, :api_version => :v2, :session_data => session_data) do |params|
-  params.name        = 'Tenant A'
-  params.description = 'First Tenant!'
-  params.enabled     = true
-end
-
-puts response.status
-</pre>
-
-<p>Note how we're also providing a :base_url in our session_data variable above.
-This is necessary since we normally get the service endpoints from Keystone when
-we authenticate. Since we are not authenticating against Keystone, then we don't
-have that catalogue to begin with. Thus the need to hardcode it in the request.</p>
+<p>The <code>auth_credentials</code> in the config file are optional
+and can be supplied at runtime. For more information see the 
+<a href="doc/Aviator/Session.html">documentation.</a></p>
 
 <h3>Browse the available requests</h3>
 
@@ -222,7 +130,7 @@ Parameters:
  +-------------+----------+-------------+
 
 Sample Code:
-  session.compute_service.request(:create_server) do |params|
+  session.request(:compute_service, :create_server) do |params|
     params.access_ipv4 = value
     params.access_ipv6 = value
     params.admin_pass = value
@@ -320,25 +228,11 @@ str = session.dump
 session = Aviator::Session.load(str)
 </pre>
 
-<p>This DOES NOT create a new token in the backend. If you employed any form of encryption on the string, make sure to decrypt it first!</p>
-
 <p>Depending on how old the loaded session dump is, its session data may already be expired.
 Check if it's still current by calling <code>Session#validate</code> and reauthenticate as needed.</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 session.authenticate unless session.validate
-</pre>
-
-<p>IMPORTANT: The validator must be defined in the config file and it must refer to the
-name of a request that is known to Aviator (<code>list_tenants</code> usually will do). See the configuration example above.</p>
-
-<p>If you want the newly deserialized session to log its output, make sure to indicate it on load</p>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session = Aviator::Session.load(
-            session_dump_str,
-            :log_file => 'path/to/aviator.log'
-          )
 </pre>
 
 <p>Need a way to persist session dumps? Give <a href="https://github.com/aviator/session_pool">Aviator::SessionPool</a> a try!</p>
@@ -373,9 +267,9 @@ $ gem install aviator
 
 <br/>
 
-<h3>Need API documentation?</h3>
+<h3>API documentation</h3>
 
-<p>API documentation is incomplete for the project as a whole, but we've made
+<p>API documentation is still a work in progress, but we've made
 sure to fully cover the important ones:
   <ul>
     <li><a href="doc/Aviator/Session.html">Aviator::Session</a></li>
@@ -388,41 +282,6 @@ sure to fully cover the important ones:
 
 <p>Check out <a href="https://github.com/aviator/demo">the demo project</a> for a quick
 sampling of how you can use Aviator.</p>
-
-<br/>
-
-<h3>Good to Know</h3>
-
-<p>In some instances, <code>Session::load</code> is inefficient because it creates a new session object
-each time. If object re-use is important to you, use <code>Session#load</code>
-(instance method, as opposed to class method). This will 'infect' an already existing
-session object with the supplied session dump and return itself instead of creating
-a brand new session object.
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session.load(other_session_dump)
-</pre>
-
-<p>You can choose to be explicit about the endpoint type. Useful in those rare instances when
-the same request name means differently depending on the endpoint type.
-For example, in OpenStack, <code>:list_tenants</code> will return only the tenants the
-user is a member of in the public endpoint whereas the admin endpoint will
-return all tenants in the system.</p>
-
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-response = keystone.request(:list_tenants, :endpoint_type => 'admin')
-</pre>
-
-<p>In the configuration file, the validator can be any request name as long as:</p>
-
-<p>
-    <ul>
-        <li>It is defined in Aviator</li>
-        <li>Does not require any parameters</li>
-        <li>It returns an HTTP status 200 or 203 to indicate auth info validity.</li>
-        <li>It returns any other HTTP status to indicate that the auth info is invalid.</li>
-    </ul>
-</p>
 
 <br/>
 
