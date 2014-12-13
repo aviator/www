@@ -61,7 +61,7 @@
   <h3>Parent</h3>
 
   
-  <p class="link"><a href="../Object.html">Object</a>
+  <p class="link">Object
   
 </div>
 
@@ -92,6 +92,8 @@
 
   <section class="description">
     
+<p>Manages a service</p>
+
   </section>
 
   
@@ -179,7 +181,7 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 66</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 69</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">opts</span>={})
   <span class="ruby-ivar">@provider</span> = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:provider</span>] <span class="ruby-operator">||</span> (<span class="ruby-identifier">raise</span> <span class="ruby-constant">ProviderNotDefinedError</span>.<span class="ruby-identifier">new</span>)
   <span class="ruby-ivar">@service</span>  = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:service</span>]  <span class="ruby-operator">||</span> (<span class="ruby-identifier">raise</span> <span class="ruby-constant">ServiceNameNotDefinedError</span>.<span class="ruby-identifier">new</span>)
@@ -221,13 +223,14 @@
 
         <div class="method-description">
           
-          
+          <p>No longer recommended for public use. Use <a
+href="Session.html#method-i-request">Aviator::Session#request</a> instead</p>
           
           
 
           
           <div class="method-source-code" id="request-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 78</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 83</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">request</span>(<span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">params</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:api_version</span>].<span class="ruby-identifier">nil?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@default_options</span>[<span class="ruby-value">:api_version</span>]
     <span class="ruby-identifier">options</span>[<span class="ruby-value">:api_version</span>] = <span class="ruby-ivar">@default_options</span>[<span class="ruby-value">:api_version</span>]
@@ -298,7 +301,7 @@
 
           
           <div class="method-source-code" id="request_classes-source">
-            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 121</span>
+            <pre><span class="ruby-comment"># File lib/aviator/core/service.rb, line 126</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">request_classes</span>
   <span class="ruby-ivar">@request_classes</span>
 <span class="ruby-keyword">end</span></pre>
