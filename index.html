@@ -32,9 +32,9 @@
         </header>
         <hr>
 
-        <p>Aviator is a framework for writing REST API clients. To
-           help get you started, it includes a few OpenStack request
-           files you can use for educational purposes.</p>
+        <p>Aviator is a framework for writing REST API clients. As a reference
+          implementation, it includes a few OpenStack request classes you can
+          use for educational purposes.</p>
 
         <section id="main_content">
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
@@ -51,53 +51,13 @@ response = openstack.request :identity_service, :list_tenants
 puts response[:body]
 </pre>
 
-<p>See the <a href="doc/Aviator/Session.html">API docs</a> for more information
-on how to send requests.</a>
+        <p>It can handle Keystone v2 and v3 authentication data but
+          there is no guarantee that all OpenStack API endpoints are
+          supported. You will likely need to write some of the
+          request files yourself.</p>
 
-
-<p>There is no guarantees of completeness in its OpenStack
-   support and you will likely need to write some of the
-   request files.</p>
-
-<br/>
-
-<h3>Configure for multiple environments</h3>
-
-<p>The config file is a simple YAML file that can have one or more environment definitions.</p>
-
-<pre class="brush: yaml; gutter: false; toolbar: false; class-name: 'codeblock'">
-production:
-  provider: openstack
-  auth_service:
-    name: identity
-    host_uri: 'http://my.openstackenv.org:5000'
-    request: create_token
-    validator: list_tenants
-    api_version: v2
-  auth_credentials:
-    token_id: 2c963f5512d067b24fdc312707c80c7a6d3d261b
-    tenant_name: admin
-
-development:
-  provider: openstack
-  auth_service:
-    name: identity
-    host_uri: 'http://devstack:5000/v2.0'
-    request: create_token
-    validator: list_tenants
-  auth_credentials:
-    username: myusername
-    password: mypassword
-    tenant_name: myproject
-</pre>
-
-<p>The <code>auth_credentials</code> in the config file are optional
-and can be supplied at runtime. For more information see the 
-<a href="doc/Aviator/Session.html">documentation.</a></p>
-
-<h3>Browse the available requests</h3>
-
-<p>Aviator comes with a handy dandy command line interface called <code>describe</code> that allows you to inspect the available requests in the library:</p>
+        <p>To know which requests are available, you may use the built-in
+          CLI tool <code>describe</code>:
 
 <pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
 $ aviator describe openstack
@@ -107,6 +67,7 @@ Available services for openstack:
   image
   metering
   volume
+
 
 $ aviator describe openstack compute
 Available requests for openstack compute_service:
@@ -119,6 +80,7 @@ Available requests for openstack compute_service:
   v2 public create_image
   v2 public create_server
   ...
+
 
 $ aviator describe openstack compute v2 public create_server
 Request: create_server
@@ -156,11 +118,11 @@ Links:
     http://docs.openstack.org/api/openstack-compute/2/content/CreateServers.html
 </pre>
 
-<p>TIP: On OS X, command click on the link to open it in a browser.</p>
 
-<h3>...Or Read the Code Directly</h3>
-
-<p>We designed a DSL for the request definition files so that they are easy to read, easy to add to, and pretty much be self documenting (in fact, the same code is used by the <code>describe</code> CLI tool). For instance, here is the actual code for the <code>create_server</code> request:</p>
+        <p>If you need to write request files, the DSL is simple enough
+           to learn and you can start writing your own in 5~10 minutes.
+           As an example, here is the request file for the <code>create_server</code>
+           request mentioned above:</p>
 
 <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
 module Aviator
@@ -219,102 +181,87 @@ module Aviator
 end
 </pre>
 
-<p>Browse the rest of the request files <a href="https://github.com/aviator/aviator/tree/master/lib/aviator/openstack">here</a>.</p>
+        <p>Browse the rest of the request files <a href="https://github.com/aviator/aviator/tree/master/lib/aviator/openstack">here</a>.</p>
 
-<h3>Session Management API</h3>
+        <br/>
 
-<p>Serialize the session information for caching. The output is in plaintext JSON which
- contains sensitive information. You are responsible for securing that.</p>
+        <h3>Installation</h3>
 
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session = Aviator::Session.new( ... )
-str = session.dump
-</pre>
+        <p>Add this line to your application's Gemfile:</p>
 
-<p>Creating a new Session object from a session dump is just as easy.</p>
+        <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+        gem 'aviator'
+        </pre>
 
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session = Aviator::Session.load(str)
-</pre>
+        <p>Or if you want to live on the edge:</p>
 
-<p>Depending on how old the loaded session dump is, its session data may already be expired.
-Check if it's still current by calling <code>Session#validate</code> and reauthenticate as needed.</p>
+        <pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
+        gem 'aviator', :git => 'git@github.com:aviator/aviator.git', :branch => 'master'
+        </pre>
 
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-session.authenticate unless session.validate
-</pre>
+        <p>And then execute:</p>
 
-<p>Need a way to persist session dumps? Give <a href="https://github.com/aviator/session_pool">Aviator::SessionPool</a> a try!</p>
+        <pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
+        $ bundle install
+        </pre>
 
-<br/>
+        <p>Or install it yourself as:</p>
 
-<h3>Install It Now!</h3>
+        <pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
+        $ gem install aviator
+        </pre>
 
-<p>Add this line to your application's Gemfile:</p>
+        <br/>
 
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-gem 'aviator'
-</pre>
+        <h3>API documentation</h3>
 
-<p>Or if you want to live on the edge:</p>
+        <p>It's is still a work in progress but I've made sure to cover the important ones:
+          <ul>
+            <li><a href="doc/Aviator/Session.html">Aviator::Session</a></li>
+            <li><a href="doc/Aviator/Openstack/Provider.html">Aviator::Openstack::Provider</a></li>
+          </ul>
+        </p>
 
-<pre class="brush: ruby; gutter: false; toolbar: false; class-name: 'codeblock'">
-gem 'aviator', :git => 'git@github.com:aviator/aviator.git', :branch => 'master'
-</pre>
+        <br/>
 
-<p>And then execute:</p>
+        <h3>Need Some Samples?</h3>
 
-<pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
-$ bundle install
-</pre>
+        <p>Check out <a href="https://github.com/aviator/demo">the demo project</a> for a quick
+        sampling of how you can use Aviator.</p>
 
-<p>Or install it yourself as:</p>
+        <br/>
 
-<pre class="brush: plain; gutter: false; toolbar: false; class-name: 'codeblock'">
-$ gem install aviator
-</pre>
+        <h3>Other Links</h3>
 
-<br/>
+        <p>
+        <ul>
+            <li><a href="https://github.com/aviator/aviator">The code at Github</a></li>
+            <li><a href="https://github.com/aviator/aviator/issues?state=open">Bug tracker</a></li>
+            <li><a href="https://forge.puppetlabs.com/aimonb/aviator">Aviator Puppet module (maintained by Aimon Bustardo)</a></li>
+            <li><a href="https://github.com/aviator/session_pool">Aviator::SessionPool</a></li>
+            <li><a href="https://github.com/aviator/aviator/wiki">Wiki</a></li>
+            <li><a href="https://github.com/aviator/www">The code for this website</a></li>
+        </ul>
+        </p>
 
-<h3>API documentation</h3>
+        <br/>
 
-<p>API documentation is still a work in progress, but we've made
-sure to fully cover the important ones:
-  <ul>
-    <li><a href="doc/Aviator/Session.html">Aviator::Session</a></li>
-    <li><a href="doc/Aviator/Openstack/Provider.html">Aviator::Openstack::Provider</a></li>
-  </ul>
-</p>
+        <h3>Project Stats</h3>
 
+        <p id="badges"><a href="https://travis-ci.org/aviator/aviator"><img src="https://travis-ci.org/aviator/aviator.png?branch=master" alt="Build Status" style="max-width:100%;"></a>
+        <a href="https://coveralls.io/r/aviator/aviator?branch=master"><img src="https://coveralls.io/repos/aviator/aviator/badge.png?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
+        <a href="https://codeclimate.com/github/aviator/aviator"><img src="https://codeclimate.com/github/aviator/aviator.png" alt="Code Climate" style="max-width:100%;"></a>
+        <a href="http://badge.fury.io/rb/aviator"><img src="https://badge.fury.io/rb/aviator.png" alt="Gem Version" style="max-width:100%;"></a>
 
-<h3>Need Some Samples?</h3>
+        <br/>
 
-<p>Check out <a href="https://github.com/aviator/demo">the demo project</a> for a quick
-sampling of how you can use Aviator.</p>
+        <h3>Absolutely Zero Warranty of Any Kind</h3>
 
-<br/>
-
-<h3>Useful Links</h3>
-
-<p>
-<ul>
-    <li><a href="https://github.com/aviator/aviator">The code at Github</a></li>
-    <li><a href="https://github.com/aviator/aviator/issues?state=open">Bug tracker</a></li>
-    <li><a href="https://forge.puppetlabs.com/aimonb/aviator">Aviator Puppet module (maintained by Aimon Bustardo)</a></li>
-    <li><a href="https://github.com/aviator/aviator/wiki">Wiki</a></li>
-    <li><a href="https://github.com/aviator/www">The code for this website</a></li>
-</ul>
-</p>
-
-<br/>
-
-<h3>Project Stats</h3>
-
-<p id="badges"><a href="https://travis-ci.org/aviator/aviator"><img src="https://travis-ci.org/aviator/aviator.png?branch=master" alt="Build Status" style="max-width:100%;"></a>
-<a href="https://coveralls.io/r/aviator/aviator?branch=master"><img src="https://coveralls.io/repos/aviator/aviator/badge.png?branch=master" alt="Coverage Status" style="max-width:100%;"></a>
-<a href="https://codeclimate.com/github/aviator/aviator"><img src="https://codeclimate.com/github/aviator/aviator.png" alt="Code Climate" style="max-width:100%;"></a>
-<a href="http://badge.fury.io/rb/aviator"><img src="https://badge.fury.io/rb/aviator.png" alt="Gem Version" style="max-width:100%;"></a>
-
+        <p>This library is released under the MIT license, so have at it as you wish as long as
+           it is within the boundaries of said license. If you have any questions, feel free to
+           <a href="https://github.com/aviator/aviator/issues?q=is%3Aopen">file it here</a>. I
+           don't make response time guarantees. This is a hobby project for me nowadays and I will
+           work on it when I have time. Having said that, I usually find time near the weekend.</p>
 
         </section>
 
